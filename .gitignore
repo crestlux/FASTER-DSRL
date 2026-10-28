@@ -1,0 +1,55 @@
+# Local research history and review material (never part of the public source).
+/.local-only/
+/tests/
+/release-files.txt
+/scripts/export_public_release.py
+/artifacts/
+/docs/
+/FASTER-DSRL.pdf
+/FASTER-DSRL.svg
+/home/
+/runs/
+/archive/
+/logs/
+/plots/
+/third_party/
+
+# Data, trained weights, simulator recordings, and experiment output.
+/datasets
+/exp
+wandb/
+*.hdf5
+*.h5
+*.pkl
+*.msgpack
+*.pt
+*.pth
+*.npz
+*.npy
+*.mp4
+
+# Credentials and machine-specific configuration.
+.env
+.env.*
+!.env.example
+.netrc
+/.aws/
+/.agents/
+/.codex/
+/.vscode/
+/.idea/
+
+# Python environments, caches, and generated release previews.
+.venv
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+*.zip
+*.tar.gz
+.DS_Store

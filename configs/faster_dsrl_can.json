@@ -1,0 +1,64 @@
+{
+  "dataset": "datasets/robomimic/can/mh/image_v141.hdf5",
+  "env_horizon": 500,
+  "discount": 0.99,
+  "seed": 42,
+  "batch_size": 256,
+  "bc_steps": 50000,
+  "bc_eval_interval": 25000,
+  "base_steps": 4000,
+  "qa_calibration_steps": 2000,
+  "qz_calibration_steps": 1000,
+  "total_steps": 500000,
+  "eval_interval": 5000,
+  "eval_episodes": 10,
+  "final_eval_episodes": 200,
+  "checkpoint_interval": 5000,
+  "qa_updates": 4,
+  "qz_updates": 4,
+  "actor_updates": 1,
+  "offline_fraction": 0.5,
+  "replay_capacity": 100000,
+  "cache_capacity": 100000,
+  "wandb_project": "faster-cached-dsrl",
+  "learner": {
+    "observation_dim": 23,
+    "action_dim": 7,
+    "horizon": 4,
+    "execution_horizon": 4,
+    "denoise_steps": 10,
+    "actor_dims": [
+      256,
+      256,
+      256
+    ],
+    "qa_dims": [
+      1024,
+      1024,
+      1024
+    ],
+    "qz_dims": [
+      512,
+      512,
+      512
+    ],
+    "bc_width": 256,
+    "bc_blocks": 3,
+    "bc_cond_dims": [
+      256,
+      256
+    ],
+    "bc_lr": 0.0003,
+    "rl_lr": 0.0003,
+    "bc_ema_beta": 0.999,
+    "qa_target_beta": 0.995,
+    "qz_ema_beta": 0.995,
+    "actor_ema_beta": 0.98,
+    "noise_scale": 1.5,
+    "initial_alpha": 1.0,
+    "target_entropy": 0.0,
+    "learned": 8,
+    "gaussian": 0,
+    "decoder_solver": "faster_ddim"
+  }
+}
