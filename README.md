@@ -8,13 +8,13 @@ This repository contains the low-dimensional Robomimic **Can (MH)** and **Square
 
 ## Method
 
-![FASTER-DSRL architecture](assets/architecture.svg)
+[![FASTER-DSRL architecture](assets/architecture.png)](assets/architecture.svg)
 
-*Training and action selection. Dashed arrows indicate learning paths; $\operatorname{sg}$ denotes stop-gradient.*
+*Training and action selection. Dashed arrows indicate learning paths; $`\mathrm{sg}`$ denotes stop-gradient.*
 
-For state $s$, the actor draws $N=8$ independent candidates:
+For state $`s`$, the actor draws $`N=8`$ independent candidates:
 
-$$
+```math
 \begin{aligned}
 \epsilon_i &\sim \mathcal{N}(0,I), \qquad i=1,\ldots,N, \\
 z_i &= 1.5\,\tanh\!\left(\mu(s)+\sigma(s)\odot\epsilon_i\right), \\
@@ -22,23 +22,23 @@ z_i &= 1.5\,\tanh\!\left(\mu(s)+\sigma(s)\odot\epsilon_i\right), \\
 i^\star &= \underset{i\in\{1,\ldots,N\}}{\arg\max}\;\min_{j\in\{1,2\}} Q_{A,j}(s,\widehat{a}_i), \\
 a &= D(s,z_{i^\star}).
 \end{aligned}
-$$
+```
 
 The Action Predictor is trained by supervised regression to the frozen decoder's output:
 
-$$
-\mathcal{L}_g = \operatorname{MSE}\!\left(g(s,z),\operatorname{sg}\!\left[D(s,z)\right]\right).
-$$
+```math
+\mathcal{L}_g = \mathrm{MSE}\!\left(g(s,z),\mathrm{sg}\!\left[D(s,z)\right]\right).
+```
 
-Its predictions are used for ranking; the executed action always comes from $D$.
+Its predictions are used for ranking; the executed action always comes from $`D`$.
 
-The action critic $Q_A$ learns from environment rewards and bootstrapped action values. The noise critic $Q_z$ learns detached action-critic targets on actual decoded actions and supplies the noise actor's learning signal. The final selector uses $g + Q_A$; $Q_z$ remains part of actor training. Cached $(s,z,D(s,z))$ mappings are reused with current critic targets.
+The action critic $`Q_A`$ learns from environment rewards and bootstrapped action values. The noise critic $`Q_z`$ learns detached action-critic targets on actual decoded actions and supplies the noise actor's learning signal. The final selector uses $`g + Q_A`$; $`Q_z`$ remains part of actor training. Cached $`(s,z,D(s,z))`$ mappings are reused with current critic targets.
 
 ### Pretraining and initialization
 
 Before RL, we train one diffusion BC policy per task for **50,000 optimizer updates** with **batch size 256**, using **300 Can (MH) demonstrations** or **200 Square (PH) demonstrations**. The seed-42 EMA checkpoint at update 50,000 is frozen and shared across RL seeds 42, 43, and 44 for that task.
 
-Each RL run collects approximately **4,000 primitive environment steps** with the frozen BC policy, then performs **2,000 action-critic updates** and **1,000 noise-critic updates**. Its Action Predictor is pretrained for **50,000 supervised updates**, with batch size 256 and learning rate $3\times10^{-4}$, on cached $(s,z,D(s,z))$ mappings. This Predictor pretraining requires no additional environment interaction. The **500,000-step interaction budget includes the initial collection**; offline optimizer updates are counted separately.
+Each RL run collects approximately **4,000 primitive environment steps** with the frozen BC policy, then performs **2,000 action-critic updates** and **1,000 noise-critic updates**. Its Action Predictor is pretrained for **50,000 supervised updates**, with batch size 256 and learning rate $`3\times10^{-4}`$, on cached $`(s,z,D(s,z))`$ mappings. This Predictor pretraining requires no additional environment interaction. The **500,000-step interaction budget includes the initial collection**; offline optimizer updates are counted separately.
 
 ## Experiments
 
@@ -50,16 +50,16 @@ Each RL run collects approximately **4,000 primitive environment steps** with th
 
 ### Learning performance
 
-Success rate (%) on three RL seeds (42, 43, 44), with 200 evaluation episodes per seed. Values are **mean $\pm$ sample standard deviation**. The step columns refer to primitive environment interactions, not optimizer updates. Each task uses a shared, task-specific BC checkpoint.
+Success rate (%) on three RL seeds (42, 43, 44), with 200 evaluation episodes per seed. Values are **mean $`\pm`$ sample standard deviation**. The step columns refer to primitive environment interactions, not optimizer updates. Each task uses a shared, task-specific BC checkpoint.
 
 | Task | Method | 50k | 100k | 250k | 500k |
 | --- | --- | ---: | ---: | ---: | ---: |
-| Can | FASTER-EXPO | $89.67 \pm 3.21$ | $90.67 \pm 0.76$ | $92.33 \pm 1.26$ | $93.33 \pm 2.02$ |
-| Can | DSRL-NA | $72.67 \pm 3.40$ | $91.50 \pm 6.73$ | $97.50 \pm 2.60$ | $97.50 \pm 0.00$ |
-| Can | **FASTER-DSRL** | $\mathbf{98.17 \pm 0.76}$ | $\mathbf{98.00 \pm 1.73}$ | $\mathbf{98.83 \pm 1.26}$ | $\mathbf{99.17 \pm 0.76}$ |
-| Square | FASTER-EXPO | $83.67 \pm 0.29$ | $79.83 \pm 1.61$ | $87.83 \pm 2.52$ | $88.33 \pm 3.06$ |
-| Square | DSRL-NA | $65.00 \pm 3.77$ | $78.17 \pm 0.76$ | $91.33 \pm 1.04$ | $\mathbf{97.17 \pm 1.26}$ |
-| Square | **FASTER-DSRL** | $\mathbf{88.83 \pm 3.69}$ | $\mathbf{91.17 \pm 1.44}$ | $\mathbf{93.17 \pm 2.75}$ | $\mathbf{97.17 \pm 1.26}$ |
+| Can | FASTER-EXPO | $`89.67 \pm 3.21`$ | $`90.67 \pm 0.76`$ | $`92.33 \pm 1.26`$ | $`93.33 \pm 2.02`$ |
+| Can | DSRL-NA | $`72.67 \pm 3.40`$ | $`91.50 \pm 6.73`$ | $`97.50 \pm 2.60`$ | $`97.50 \pm 0.00`$ |
+| Can | **FASTER-DSRL** | $`\mathbf{98.17 \pm 0.76}`$ | $`\mathbf{98.00 \pm 1.73}`$ | $`\mathbf{98.83 \pm 1.26}`$ | $`\mathbf{99.17 \pm 0.76}`$ |
+| Square | FASTER-EXPO | $`83.67 \pm 0.29`$ | $`79.83 \pm 1.61`$ | $`87.83 \pm 2.52`$ | $`88.33 \pm 3.06`$ |
+| Square | DSRL-NA | $`65.00 \pm 3.77`$ | $`78.17 \pm 0.76`$ | $`91.33 \pm 1.04`$ | $`\mathbf{97.17 \pm 1.26}`$ |
+| Square | **FASTER-DSRL** | $`\mathbf{88.83 \pm 3.69}`$ | $`\mathbf{91.17 \pm 1.44}`$ | $`\mathbf{93.17 \pm 2.75}`$ | $`\mathbf{97.17 \pm 1.26}`$ |
 
 At 50k interactions, FASTER-DSRL improves the observed mean over DSRL-NA by 25.50 percentage points on Can and 23.83 points on Square. At 500k, its Square mean equals DSRL-NA's. These comparisons match task and interaction budget; they do not equalize total training computation or update schedules.
 
@@ -71,10 +71,10 @@ Square, 500k interactions, three seeds × 200 episodes:
 
 | Condition | Candidate selector | Noise actor | Success (%) |
 | --- | --- | --- | ---: |
-| Full FASTER-DSRL | Action Predictor + $Q_A$ | Learned | $\mathbf{97.17 \pm 1.26}$ |
-| Without Action Predictor | $Q_z$ | Learned | $92.67 \pm 2.02$ |
-| Without noise learning | Action Predictor + $Q_A$ | Frozen initial actor | $95.33 \pm 1.15$ |
-| Without both | $Q_z$ | Frozen initial actor | $95.17 \pm 2.02$ |
+| Full FASTER-DSRL | Action Predictor + $`Q_A`$ | Learned | $`\mathbf{97.17 \pm 1.26}`$ |
+| Without Action Predictor | $`Q_z`$ | Learned | $`92.67 \pm 2.02`$ |
+| Without noise learning | Action Predictor + $`Q_A`$ | Frozen initial actor | $`95.33 \pm 1.15`$ |
+| Without both | $`Q_z`$ | Frozen initial actor | $`95.17 \pm 2.02`$ |
 
 All conditions execute one original decoder output and retain critic learning. The frozen initial actor is state-conditioned; it is not a standard Gaussian proposal. The Action Predictor's observed contribution with noise learning enabled is 4.50 percentage points at this endpoint.
 
@@ -84,16 +84,16 @@ All conditions execute one original decoder output and retain critic learning. T
 
 Reported RTX 3090 FP32 latency, in **milliseconds per batch**, at eight candidates unless noted:
 
-| Method | Candidates | Batch $1$ | Batch $32$ |
+| Method | Candidates | Batch $`1`$ | Batch $`32`$ |
 | --- | ---: | ---: | ---: |
-| Gaussian Best-of-N | $8$ | $1.815$ | $2.589$ |
-| FASTER-EXPO | $8$ | $1.732$ | $2.308$ |
-| DSRL-NA (JAX port) | $1$ | $0.854$ | $1.210$ |
-| FASTER-DSRL | $8$ | $\mathbf{1.337}$ | $\mathbf{1.859}$ |
-| FASTER-DSRL | $16$ | $1.349$ | $2.068$ |
-| FASTER-DSRL | $32$ | $1.372$ | $2.446$ |
+| Gaussian Best-of-N | $`8`$ | $`1.815`$ | $`2.589`$ |
+| FASTER-EXPO | $`8`$ | $`1.732`$ | $`2.308`$ |
+| DSRL-NA (JAX port) | $`1`$ | $`0.854`$ | $`1.210`$ |
+| FASTER-DSRL | $`8`$ | $`\mathbf{1.337}`$ | $`\mathbf{1.859}`$ |
+| FASTER-DSRL | $`16`$ | $`1.349`$ | $`2.068`$ |
+| FASTER-DSRL | $`32`$ | $`1.372`$ | $`2.446`$ |
 
-At $N=8$, the displayed FASTER-DSRL implementation takes 26.3% less time for batch 1 and 28.2% less for batch 32 than the displayed Gaussian Best-of-N implementation. These measurements include host observation input and synchronized host action output, and exclude compilation, loading, timestep-cache preparation, and simulator execution.
+At $`N=8`$, the displayed FASTER-DSRL implementation takes 26.3% less time for batch 1 and 28.2% less for batch 32 than the displayed Gaussian Best-of-N implementation. These measurements include host observation input and synchronized host action output, and exclude compilation, loading, timestep-cache preparation, and simulator execution.
 
 The table combines recorded measurement sessions and implementation versions: the Gaussian BoN/FASTER-EXPO measurements precede the optimized FASTER-DSRL measurements, and DSRL-NA was separately remeasured after a JAX port. The percentages describe these implementations, not an isolated algorithm-only speedup. Single-candidate DSRL-NA is faster in this table.
 
@@ -101,21 +101,21 @@ The table combines recorded measurement sessions and implementation versions: th
 
 ![Figure 3: Success rate by deployment candidate count](assets/candidate_count.png)
 
-The Gaussian BoN success-rate comparator uses an independently trained policy. Increasing candidate count did not monotonically improve success: FASTER-DSRL's Square 500k means were 97.17%, 95.83%, and 95.50% for $N=8$, $16$, and $32$. The default is $N=8$.
+The Gaussian BoN success-rate comparator uses an independently trained policy. Increasing candidate count did not monotonically improve success: FASTER-DSRL's Square 500k means were 97.17%, 95.83%, and 95.50% for $`N=8`$, $`16`$, and $`32`$. The default is $`N=8`$.
 
 ### Candidate selection quality
 
-Candidate selection on Square at 500k interactions, using three seeds × 64 shared states and eight candidates per state. Values are **mean $\pm$ sample standard deviation** across seeds.
+Candidate selection on Square at 500k interactions, using three seeds × 64 shared states and eight candidates per state. Values are **mean $`\pm`$ sample standard deviation** across seeds.
 
-| Metric | FASTER-EXPO | Noise Critic $Q_z$ | Action Predictor + $Q_A$ |
+| Metric | FASTER-EXPO | Noise Critic $`Q_z`$ | Action Predictor + $`Q_A`$ |
 | --- | ---: | ---: | ---: |
-| Top-1 selection accuracy (%) ↑ | $22.40 \pm 5.02$ | $27.60 \pm 5.02$ | $\mathbf{48.96 \pm 3.25}$ |
-| Pairwise ranking agreement (%) ↑ | $55.06 \pm 0.42$ | $62.57 \pm 2.87$ | $\mathbf{77.70 \pm 1.38}$ |
-| Mean value loss ($\times10^{-3}$) ↓ | $4.62 \pm 1.96$ | $5.99 \pm 1.61$ | $\mathbf{3.24 \pm 0.98}$ |
+| Top-1 selection accuracy (%) ↑ | $`22.40 \pm 5.02`$ | $`27.60 \pm 5.02`$ | $`\mathbf{48.96 \pm 3.25}`$ |
+| Pairwise ranking agreement (%) ↑ | $`55.06 \pm 0.42`$ | $`62.57 \pm 2.87`$ | $`\mathbf{77.70 \pm 1.38}`$ |
+| Mean value loss ($`\times10^{-3}`$) ↓ | $`4.62 \pm 1.96`$ | $`5.99 \pm 1.61`$ | $`\mathbf{3.24 \pm 0.98}`$ |
 
 The reference ranks the eight fully decoded candidates with the current action critic. Top-1 accuracy measures selection of the highest-valued candidate; pairwise agreement measures agreement on candidate ordering. Mean value loss is the action-critic value gap between the reference's best candidate and the selected candidate.
 
-The $Q_z$ and Predictor diagnostics use the same final checkpoint, critic, and candidate bank. FASTER-EXPO uses its own critic, so its absolute value loss is not directly comparable with theirs. These diagnostics measure agreement with learned values, not environment returns or rollout success. All candidates are decoded only to compute the diagnostic reference.
+The $`Q_z`$ and Predictor diagnostics use the same final checkpoint, critic, and candidate bank. FASTER-EXPO uses its own critic, so its absolute value loss is not directly comparable with theirs. These diagnostics measure agreement with learned values, not environment returns or rollout success. All candidates are decoded only to compute the diagnostic reference.
 
 ## Training contract
 
@@ -123,21 +123,21 @@ The $Q_z$ and Predictor diagnostics use the same final checkpoint, critic, and c
 | --- | --- |
 | Observation | 23D raw state: end-effector position, quaternion, gripper position, object state |
 | Action | 7D per primitive step |
-| Prediction / execution horizon | $H=C=4$ (28D flattened chunk) |
+| Prediction / execution horizon | $`H=C=4`$ (28D flattened chunk) |
 | Frozen base | BC EMA after 50k updates; deterministic 10-step FASTER DDIM |
 | Training / evaluation candidates | 8 learned / 8 learned |
-| Noise actor | $256 \times 3$; learning rate $3\times10^{-4}$ |
-| Action Predictor | $1024 \times 3$, LayerNorm and tanh; learning rate $3\times10^{-4}$ |
-| Twin action / noise critics | $1024 \times 3$ / $512 \times 3$ |
+| Noise actor | $`256 \times 3`$; learning rate $`3\times10^{-4}`$ |
+| Action Predictor | $`1024 \times 3`$, LayerNorm and tanh; learning rate $`3\times10^{-4}`$ |
+| Twin action / noise critics | $`1024 \times 3`$ / $`512 \times 3`$ |
 | Batch / offline fraction | 256 / 0.5 |
 | Primitive discount | 0.99 |
-| Initial collection / critic calibration | 4k primitive steps / 2k $Q_A$ + 1k $Q_z$ updates |
+| Initial collection / critic calibration | 4k primitive steps / 2k $`Q_A`$ + 1k $`Q_z`$ updates |
 | Predictor calibration | 50k supervised updates |
-| Updates per decision | 4 $Q_A$, 4 $Q_z$, 4 Predictor, 1 actor |
+| Updates per decision | 4 $`Q_A`$, 4 $`Q_z`$, 4 Predictor, 1 actor |
 | Temperature | Automatic until 50k primitive steps; then retain that run's temperature state |
 | Evaluation horizon | Can: 500; Square: 400 primitive steps |
 
-For an actual execution length $k$, replay stores discounted rewards and a $\gamma^k$ bootstrap discount. Terminal and truncated chunks follow the existing validity-mask contract. The decoder stays frozen throughout RL. Actor entropy is defined in normalized noise coordinates, and the action-critic target contains no entropy bonus.
+For an actual execution length $`k`$, replay stores discounted rewards and a $`\gamma^k`$ bootstrap discount. Terminal and truncated chunks follow the existing validity-mask contract. The decoder stays frozen throughout RL. Actor entropy is defined in normalized noise coordinates, and the action-critic target contains no entropy bonus.
 
 ## Setup
 
